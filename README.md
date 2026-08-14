@@ -1,1 +1,352 @@
-# CalculadoraDeCusto
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Custo da Dor — PipeLovers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A0C10;
+    --panel: #14171D;
+    --panel-raised: #191D24;
+    --border: #262B33;
+    --text: #EDEFF2;
+    --muted: #8992A0;
+    --muted-2: #5B6270;
+    --tempo: #4FA3FF;
+    --oport: #E8B34D;
+    --reten: #FF5A5F;
+    --stamp: #FF3B30;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; background:var(--bg); color:var(--text);
+    font-family:'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+  body{ padding: 32px 20px 80px; }
+
+  .wrap{ max-width: 1040px; margin: 0 auto; }
+
+  /* header */
+  .eyebrow{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.18em;
+    color: var(--muted-2); text-transform:uppercase; display:flex; align-items:center; gap:10px; }
+  .eyebrow::before{ content:''; width:6px; height:6px; background:var(--stamp); border-radius:50%;
+    box-shadow:0 0 8px var(--stamp); flex-shrink:0; }
+  h1{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: clamp(28px, 5vw, 44px);
+    letter-spacing:-0.01em; margin: 10px 0 6px; line-height:1.05; }
+  .sub{ color: var(--muted); font-size:15px; max-width:560px; line-height:1.5; margin-bottom: 36px; }
+
+  /* pillar grid */
+  .pillars{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom: 20px; }
+  @media (max-width: 860px){ .pillars{ grid-template-columns: 1fr; } }
+
+  .card{ background: var(--panel); border:1px solid var(--border); border-radius:10px; padding:22px; position:relative; overflow:hidden; }
+  .card::before{ content:''; position:absolute; inset:0 0 auto 0; height:2px; }
+  .card.tempo::before{ background: var(--tempo); }
+  .card.oport::before{ background: var(--oport); }
+  .card.reten::before{ background: var(--reten); }
+
+  .card-label{ font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:0.14em;
+    text-transform:uppercase; display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+  .card.tempo .card-label{ color: var(--tempo); }
+  .card.oport .card-label{ color: var(--oport); }
+  .card.reten .card-label{ color: var(--reten); }
+
+  .card-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:18px; margin: 4px 0 18px; }
+
+  .field{ margin-bottom: 14px; }
+  .field label{ display:block; font-size:12.5px; color: var(--muted); margin-bottom:6px; line-height:1.3; }
+  .input-row{ display:flex; align-items:center; background: var(--panel-raised); border:1px solid var(--border);
+    border-radius:7px; overflow:hidden; transition: border-color .15s ease; }
+  .input-row:focus-within{ border-color: var(--muted-2); }
+  .input-row .prefix{ padding: 10px 0 10px 12px; color: var(--muted-2); font-family:'JetBrains Mono', monospace; font-size:13px; }
+  .input-row input{ flex:1; min-width:0; background:transparent; border:none; outline:none; color:var(--text);
+    font-family:'JetBrains Mono', monospace; font-size:14.5px; padding:10px 12px; text-align:right; }
+  .input-row .suffix{ padding: 10px 12px 10px 0; color: var(--muted-2); font-family:'JetBrains Mono', monospace; font-size:12px; }
+  input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  input[type=number]{ -moz-appearance: textfield; }
+
+  .formula{ font-family:'JetBrains Mono', monospace; font-size:11px; color: var(--muted-2); margin: 16px 0 12px;
+    padding-top:14px; border-top:1px dashed var(--border); line-height:1.6; }
+
+  .subtotal{ display:flex; align-items:baseline; justify-content:space-between; margin-top:4px; }
+  .subtotal .st-label{ font-size:12px; color:var(--muted); }
+  .subtotal .st-value{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:19px; }
+  .card.tempo .st-value{ color: var(--tempo); }
+  .card.oport .st-value{ color: var(--oport); }
+  .card.reten .st-value{ color: var(--reten); }
+  .st-note{ font-size: 10.5px; color: var(--muted-2); margin-top:2px; }
+
+  /* stamp / total */
+  .stamp-wrap{ display:flex; justify-content:center; margin: 40px 0 36px; }
+  .stamp{ border: 2px solid var(--stamp); border-radius: 10px; padding: 22px 40px; text-align:center;
+    transform: rotate(-1.2deg); position:relative; background: rgba(255,59,48,0.04); }
+  .stamp::after{ content:'CONFIDENCIAL'; position:absolute; top:8px; right:14px; font-family:'JetBrains Mono', monospace;
+    font-size:9px; letter-spacing:0.16em; color: rgba(255,59,48,0.5); }
+  .stamp-label{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+    color: var(--stamp); margin-bottom:8px; }
+  .stamp-value{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: clamp(32px, 6vw, 52px);
+    color: #fff; letter-spacing:-0.01em; }
+  .stamp-sub{ font-family:'JetBrains Mono', monospace; font-size:11px; color: var(--muted); margin-top:6px; }
+
+  .breakdown{ display:flex; justify-content:center; gap:22px; margin-bottom:44px; flex-wrap:wrap; }
+  .bd-item{ display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--muted); }
+  .bd-dot{ width:8px; height:8px; border-radius:50%; }
+  .bd-item.tempo .bd-dot{ background:var(--tempo); }
+  .bd-item.oport .bd-dot{ background:var(--oport); }
+  .bd-item.reten .bd-dot{ background:var(--reten); }
+  .bd-item b{ color: var(--text); font-weight:600; }
+
+  /* argument generator */
+  .arg-section{ background: var(--panel); border:1px solid var(--border); border-radius:10px; padding:26px; }
+  .arg-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:18px; }
+  .arg-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:16px; }
+  .arg-title span{ color: var(--muted); font-weight:400; font-size:13px; display:block; margin-top:3px; }
+
+  .channels{ display:flex; gap:6px; background: var(--panel-raised); border:1px solid var(--border); border-radius:8px; padding:4px; }
+  .channels button{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.04em; text-transform:uppercase;
+    background:transparent; border:none; color:var(--muted); padding:7px 12px; border-radius:6px; cursor:pointer; transition: all .15s ease; }
+  .channels button.active{ background: var(--stamp); color:#fff; }
+  .channels button:hover:not(.active){ color: var(--text); }
+
+  .msg-bubble{ background: var(--panel-raised); border:1px solid var(--border); border-radius:8px; padding:20px 22px;
+    font-size:15px; line-height:1.65; color: var(--text); position:relative; min-height:70px; }
+  .msg-bubble .tag{ position:absolute; top:-9px; left:16px; background: var(--bg); padding:0 8px;
+    font-family:'JetBrains Mono', monospace; font-size:9.5px; letter-spacing:0.14em; color: var(--muted-2); text-transform:uppercase; }
+  .msg-bubble b{ color: var(--oport); font-weight:600; }
+
+  footer{ text-align:center; margin-top: 50px; color: var(--muted-2); font-family:'JetBrains Mono', monospace; font-size:11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Ferramenta liberada — Aula 197</div>
+  <h1>Calculadora de Custo da Dor</h1>
+  <p class="sub">Preencha os três pilares com dados públicos (LinkedIn, portais de vagas, CNPJ) e do primeiro contato. A calculadora monta o impacto financeiro total e a abertura de prospecção com o número.</p>
+
+  <div class="pillars">
+
+    <!-- TEMPO -->
+    <div class="card tempo">
+      <div class="card-label">01 · Tempo</div>
+      <div class="card-title">Horas Perdidas</div>
+
+      <div class="field">
+        <label>Tamanho da equipe afetada</label>
+        <div class="input-row">
+          <input type="number" id="t-equipe" value="10" min="0" step="1">
+          <span class="suffix">pessoas</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Tempo perdido por pessoa / semana</label>
+        <div class="input-row">
+          <input type="number" id="t-horas" value="5" min="0" step="0.5">
+          <span class="suffix">horas</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Custo por hora</label>
+        <div class="input-row">
+          <span class="prefix">R$</span>
+          <input type="number" id="t-custo" value="50" min="0" step="1">
+        </div>
+      </div>
+
+      <div class="formula">equipe × horas/sem × custo/h × 52</div>
+      <div class="subtotal">
+        <span class="st-label">Impacto de tempo</span>
+        <span class="st-value" id="t-total">R$ 0</span>
+      </div>
+      <div class="st-note">estimativa anualizada</div>
+    </div>
+
+    <!-- OPORTUNIDADE -->
+    <div class="card oport">
+      <div class="card-label">02 · Oportunidade</div>
+      <div class="card-title">Receita na Mesa</div>
+
+      <div class="field">
+        <label>Clientes / leads afetados por mês</label>
+        <div class="input-row">
+          <input type="number" id="o-clientes" value="100" min="0" step="1">
+          <span class="suffix">clientes</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Taxa do problema</label>
+        <div class="input-row">
+          <input type="number" id="o-taxa" value="20" min="0" max="100" step="1">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Ticket médio</label>
+        <div class="input-row">
+          <span class="prefix">R$</span>
+          <input type="number" id="o-ticket" value="500" min="0" step="10">
+        </div>
+      </div>
+
+      <div class="formula">clientes × taxa do problema × ticket × 12</div>
+      <div class="subtotal">
+        <span class="st-label">Receita perdida</span>
+        <span class="st-value" id="o-total">R$ 0</span>
+      </div>
+      <div class="st-note">estimativa anualizada</div>
+    </div>
+
+    <!-- RETENÇÃO -->
+    <div class="card reten">
+      <div class="card-label">03 · Retenção</div>
+      <div class="card-title">Churn e Turnover</div>
+
+      <div class="field">
+        <label>Tamanho da equipe (LinkedIn)</label>
+        <div class="input-row">
+          <input type="number" id="r-equipe" value="40" min="0" step="1">
+          <span class="suffix">pessoas</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Turnover anual (benchmark de mercado)</label>
+        <div class="input-row">
+          <input type="number" id="r-taxa" value="35" min="0" max="100" step="1">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Custo por recontratação + rampa</label>
+        <div class="input-row">
+          <span class="prefix">R$</span>
+          <input type="number" id="r-custo" value="18000" min="0" step="500">
+        </div>
+      </div>
+
+      <div class="formula">(equipe × turnover) × custo por vaga</div>
+      <div class="subtotal">
+        <span class="st-label">Impacto de turnover</span>
+        <span class="st-value" id="r-total">R$ 0</span>
+      </div>
+      <div class="st-note" id="r-note">estimativa anualizada</div>
+    </div>
+
+  </div>
+
+  <div class="stamp-wrap">
+    <div class="stamp">
+      <div class="stamp-label">Impacto Financeiro Total / Ano</div>
+      <div class="stamp-value" id="grand-total">R$ 0</div>
+      <div class="stamp-sub" id="grand-note">tempo + oportunidade + retenção</div>
+    </div>
+  </div>
+
+  <div class="breakdown">
+    <div class="bd-item tempo"><span class="bd-dot"></span>Tempo: <b id="bd-tempo">R$ 0</b></div>
+    <div class="bd-item oport"><span class="bd-dot"></span>Oportunidade: <b id="bd-oport">R$ 0</b></div>
+    <div class="bd-item reten"><span class="bd-dot"></span>Retenção: <b id="bd-reten">R$ 0</b></div>
+  </div>
+
+  <div class="arg-section">
+    <div class="arg-head">
+      <div class="arg-title">Argumento de abertura<span>número público + dado do prospect = estimativa irrecusável</span></div>
+      <div class="channels">
+        <button data-ch="call" class="active">Cold Call</button>
+        <button data-ch="email">E-mail</button>
+        <button data-ch="linkedin">LinkedIn</button>
+        <button data-ch="whatsapp">WhatsApp</button>
+      </div>
+    </div>
+    <div class="msg-bubble">
+      <span class="tag" id="msg-tag">cold call — oral & direto</span>
+      <div id="msg-body">Preencha os campos acima para gerar a abertura.</div>
+    </div>
+  </div>
+
+  <footer>PIPELOVERS · PRÉ-VENDAS · AULA 197 — QUANTIFICANDO A DOR DO CLIENTE</footer>
+</div>
+
+<script>
+function fmt(v){
+  return v.toLocaleString('pt-BR', { style:'currency', currency:'BRL', maximumFractionDigits:0 });
+}
+function num(id){ return parseFloat(document.getElementById(id).value) || 0; }
+
+let currentChannel = 'call';
+const channelLabels = {
+  call: 'cold call — oral & direto',
+  email: 'e-mail — estruturado',
+  linkedin: 'linkedin — insight curto',
+  whatsapp: 'whatsapp — hiper-personalizado'
+};
+
+function biggestCategory(t, o, r){
+  const items = [
+    { label: 'com desperdício de tempo operacional', value: t },
+    { label: 'com receita perdida por ineficiência de processo', value: o },
+    { label: 'com rotatividade de equipe', value: r }
+  ];
+  items.sort((a,b) => b.value - a.value);
+  return items[0];
+}
+
+function buildMessage(channel, total, top, equipe){
+  const val = fmt(total);
+  const equipeTxt = equipe > 0 ? `Empresas com ~${equipe} pessoas no time` : 'Empresas do seu porte';
+  switch(channel){
+    case 'call':
+      return `"${equipeTxt} costumam gastar em torno de <b>${val}/ano</b> ${top.label}. Faz sentido entender como vocês estão lidando com esse número?"`;
+    case 'email':
+      return `Assunto: uma pergunta sobre ${top.label.replace('com ', '')}<br><br>Vi que vocês têm um time de porte considerável — ${equipeTxt.toLowerCase()} chegam a perder <b>${val}/ano</b> ${top.label}. Vale 15 minutos para entender se esse é o caso de vocês também?`;
+    case 'linkedin':
+      return `Benchmark do setor: empresas do seu porte perdem <b>${val}/ano</b> ${top.label}. Vale uma conversa rápida?`;
+    case 'whatsapp':
+      return `Oi! Vi que vocês têm uma equipe grande — o benchmark do setor aponta <b>${val}/ano</b> ${top.label}. Faz sentido bater um papo sobre isso?`;
+  }
+}
+
+function recalc(){
+  const equipe = num('t-equipe'), horas = num('t-horas'), custoH = num('t-custo');
+  const tTotal = equipe * horas * custoH * 52;
+
+  const clientes = num('o-clientes'), taxaProb = num('o-taxa')/100, ticket = num('o-ticket');
+  const oTotal = clientes * taxaProb * ticket * 12;
+
+  const rEquipe = num('r-equipe'), turnover = num('r-taxa')/100, custoVaga = num('r-custo');
+  const pessoasPerdidas = rEquipe * turnover;
+  const rTotal = pessoasPerdidas * custoVaga;
+
+  document.getElementById('t-total').textContent = fmt(tTotal);
+  document.getElementById('o-total').textContent = fmt(oTotal);
+  document.getElementById('r-total').textContent = fmt(rTotal);
+  document.getElementById('r-note').textContent = `≈ ${pessoasPerdidas.toFixed(1)} pessoas perdidas/ano`;
+
+  const grand = tTotal + oTotal + rTotal;
+  document.getElementById('grand-total').textContent = fmt(grand);
+
+  document.getElementById('bd-tempo').textContent = fmt(tTotal);
+  document.getElementById('bd-oport').textContent = fmt(oTotal);
+  document.getElementById('bd-reten').textContent = fmt(rTotal);
+
+  const top = biggestCategory(tTotal, oTotal, rTotal);
+  document.getElementById('msg-body').innerHTML = buildMessage(currentChannel, grand, top, Math.max(equipe, rEquipe));
+  document.getElementById('msg-tag').textContent = channelLabels[currentChannel];
+}
+
+document.querySelectorAll('.card input').forEach(inp => inp.addEventListener('input', recalc));
+
+document.querySelectorAll('.channels button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.channels button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentChannel = btn.dataset.ch;
+    recalc();
+  });
+});
+
+recalc();
+</script>
+</body>
+</html>       
